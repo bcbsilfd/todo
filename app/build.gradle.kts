@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("kotlin-parcelize")
     kotlin("android")
     kotlin("kapt")
 }
@@ -19,6 +20,8 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+        }
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
