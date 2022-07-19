@@ -7,14 +7,20 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.github.bcbsilfd.todo.databinding.FragmentTasksBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class TasksFragment : Fragment() {
 
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
+
+    private val viewModel by lazy { TasksViewModel() }
 
     //Add tasks adapter
 
@@ -26,10 +32,26 @@ class TasksFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.fabCreateTask.setOnClickListener { showDialog() }
+        binding.fabCreateTask.setOnClickListener { viewModel.clickCreateTask() }
+
+        subscribeToState()
+    }
+
+    private fun subscribeToState() {
+        viewModel.state.onEach {
+            when (it) {
+                is TasksState.Create -> showDialog()
+                is TasksState.Loading -> binding.pbLoading.isVisible = it.isLoading
+                is TasksState.Result -> addNewTask(it.name)
+                is TasksState.Error -> showErrorMessage(it.msg)
+                else -> Unit
+            }
+        }
+            .launchIn(lifecycleScope)
     }
 
     private fun showDialog() {
+        // TODO: Replace with bottomDialogFragment
         context?.let {
             MaterialAlertDialogBuilder(it)
                 .setView(R.layout.dialog_create_task)
@@ -40,10 +62,16 @@ class TasksFragment : Fragment() {
                     val name = findViewById<EditText>(R.id.et_name)?.text ?: ""
 
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        addNewTask("$name")
+                        viewModel.clickSubmitTask("$name")
                         dismiss()
                     }
                 }
+        }
+    }
+
+    private fun showErrorMessage(msg: String) {
+        context?.let {
+            Toast.makeText(it, msg, Toast.LENGTH_SHORT).show()
         }
     }
 
