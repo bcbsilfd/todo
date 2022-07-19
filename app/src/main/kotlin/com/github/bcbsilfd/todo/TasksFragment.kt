@@ -15,7 +15,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-class TasksFragment : Fragment() {
+class TasksFragment : Fragment(), TasksView {
 
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
@@ -32,21 +32,10 @@ class TasksFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.fabCreateTask.setOnClickListener { viewModel.clickCreateTask() }
+        binding.fabCreateTask.setOnClickListener { viewModel.clickCreate() }
 
-        subscribeToState()
-    }
-
-    private fun subscribeToState() {
-        viewModel.state.onEach {
-            when (it) {
-                is TasksState.Create -> showDialog()
-                is TasksState.Loading -> binding.pbLoading.isVisible = it.isLoading
-                is TasksState.Result -> addNewTask(it.name)
-                is TasksState.Error -> showErrorMessage(it.msg)
-                else -> Unit
-            }
-        }
+        viewModel.state
+            .onEach { render(it) }
             .launchIn(lifecycleScope)
     }
 
@@ -62,7 +51,7 @@ class TasksFragment : Fragment() {
                     val name = findViewById<EditText>(R.id.et_name)?.text ?: ""
 
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        viewModel.clickSubmitTask("$name")
+                        viewModel.clickSubmit("$name")
                         dismiss()
                     }
                 }
@@ -78,6 +67,16 @@ class TasksFragment : Fragment() {
     private fun addNewTask(name: String) {
         context?.let {
             Toast.makeText(it, name, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun render(state: TasksState) {
+        when (state) {
+            is TasksState.Show -> showDialog()
+            is TasksState.Loading -> binding.pbLoading.isVisible = state.isLoading
+            is TasksState.Create -> addNewTask(state.task.name)
+            is TasksState.Error -> showErrorMessage(state.msg)
+            else -> Unit
         }
     }
 

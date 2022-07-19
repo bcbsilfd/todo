@@ -1,5 +1,6 @@
 package com.github.bcbsilfd.todo
 
-interface TasksIntent<ACTION> {
-    fun reduce(action: ACTION)
+sealed class TasksIntent {
+    object Show : TasksIntent()
+    data class Create(val task: Task): TasksIntent()
 }
