@@ -32,7 +32,7 @@ class TasksFragment : Fragment(), TasksView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.fabCreateTask.setOnClickListener { viewModel.clickCreate() }
+        binding.fabCreateTask.setOnClickListener { viewModel.produce(TasksIntent.ShowDialog) }
 
         viewModel.state
             .onEach { render(it) }
@@ -46,12 +46,16 @@ class TasksFragment : Fragment(), TasksView {
                 .setView(R.layout.dialog_create_task)
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
+                .setCancelable(false)
                 .show()
                 .apply {
                     val name = findViewById<EditText>(R.id.et_name)?.text ?: ""
 
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        viewModel.clickSubmit("$name")
+                        viewModel.produce(TasksIntent.Create(Task("$name", "", "")))
+                    }
+                    getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+                        viewModel.produce(TasksIntent.DismissDialog)
                         dismiss()
                     }
                 }
@@ -72,7 +76,7 @@ class TasksFragment : Fragment(), TasksView {
 
     override fun render(state: TasksState) {
         when (state) {
-            is TasksState.Show -> showDialog()
+            is TasksState.ShowDialog -> showDialog()
             is TasksState.Loading -> binding.pbLoading.isVisible = state.isLoading
             is TasksState.Create -> addNewTask(state.task.name)
             is TasksState.Error -> showErrorMessage(state.msg)
