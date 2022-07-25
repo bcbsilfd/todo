@@ -1,42 +1,36 @@
 package com.github.bcbsilfd.todo
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 
 class TasksViewModel : ViewModel() {
     private var _state: MutableStateFlow<TasksState>? = MutableStateFlow(TasksState.Idle)
     val state get() = _state!!
 
-    private var _intent: MutableSharedFlow<TasksIntent>? = MutableSharedFlow()
+    fun produce(intent: TasksIntent) = mapIntentToState(intent)
 
-    init {
-        _intent
-            ?.onEach { mapIntentToState(it) }
-            ?.launchIn(viewModelScope)
-    }
-
-    fun produce(intent: TasksIntent) {
-        viewModelScope.launch { _intent?.emit(intent) }
-    }
-
-    private suspend fun mapIntentToState(intent: TasksIntent) {
+    private fun mapIntentToState(intent: TasksIntent) {
         val outState = when (intent) {
             is TasksIntent.ShowDialog -> TasksState.ShowDialog
             is TasksIntent.Create -> TasksState.Create(intent.task)
             is TasksIntent.DismissDialog -> TasksState.DismissDialog
         }
-        viewModelScope.launch {
-            _state?.emit(outState)
-        }
+        _state?.tryEmit(outState)
     }
 
     override fun onCleared() {
         _state = null
-        _intent = null
+    }
+}
+
+class TasksViewModelFactory : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(TasksViewModel::class.java)) return TasksViewModel() as T
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
