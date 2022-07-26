@@ -1,7 +1,6 @@
 package com.github.bcbsilfd.todo
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,7 +37,7 @@ class TasksFragment : Fragment(), TasksView {
             viewModel.produce(TasksIntent.ShowDialog)
         }
 
-        viewModel.state  // TODO: Repeats every recreating
+        viewModel.state
             .onEach { render(it) }
             .launchIn(lifecycleScope)
     }
@@ -80,7 +79,6 @@ class TasksFragment : Fragment(), TasksView {
     }
 
     override fun render(state: TasksState) {
-        Log.i("TAG", "TasksFragment.render: $state")
         when (state) {
             is TasksState.ShowDialog -> showDialog()
             is TasksState.Loading -> binding.pbLoading.isVisible = true
@@ -93,5 +91,9 @@ class TasksFragment : Fragment(), TasksView {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        const val TAG = "TasksFragment"
     }
 }
