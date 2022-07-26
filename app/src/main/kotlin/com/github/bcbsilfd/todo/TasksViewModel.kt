@@ -1,31 +1,32 @@
 package com.github.bcbsilfd.todo
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
+import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class TasksViewModel : ViewModel() {
-    private var _state: MutableSharedFlow<TasksState>? = MutableSharedFlow()
+    private var _state: MutableStateFlow<TasksState>? = MutableStateFlow(TasksState.Idle)
     val state get() = _state!!
 
-    fun clickCreate() {
-        produce(TasksIntent.Show)
-    }
+    fun produce(intent: TasksIntent) = mapIntentToState(intent)
 
-    fun clickSubmit(name: String) {
-        produce(TasksIntent.Create(Task(name, "Today", "Tomorrow")))
-    }
-
-    private fun produce(intent: TasksIntent) {
+    private fun mapIntentToState(intent: TasksIntent) {
         val outState = when (intent) {
-            is TasksIntent.Show -> TasksState.Show
+            is TasksIntent.ShowDialog -> TasksState.ShowDialog
             is TasksIntent.Create -> TasksState.Create(intent.task)
+            is TasksIntent.DismissDialog -> TasksState.DismissDialog
         }
-        viewModelScope.launch { _state?.emit(outState) }
+        _state?.tryEmit(outState)
     }
 
     override fun onCleared() {
         _state = null
+    }
+}
+
+class TasksViewModelFactory : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(TasksViewModel::class.java)) return TasksViewModel() as T
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

@@ -22,9 +22,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showTasksFragment() {
-        supportFragmentManager.beginTransaction()
-            .add(R.id.fv_container, TasksFragment())
-            .commit()
+        supportFragmentManager.apply {
+            val fragment = findFragmentByTag(TasksFragment.TAG)
+
+            beginTransaction().apply {
+                if (fragment == null) {
+                    add(binding.fvContainer.id, TasksFragment(), TasksFragment.TAG)
+                } else {
+                    replace(binding.fvContainer.id, fragment, TasksFragment.TAG)
+                }
+            }.commit()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

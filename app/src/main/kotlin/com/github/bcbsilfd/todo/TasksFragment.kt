@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.github.bcbsilfd.todo.databinding.FragmentTasksBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -20,19 +21,21 @@ class TasksFragment : Fragment(), TasksView {
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel by lazy { TasksViewModel() }
-
+    private lateinit var viewModel: TasksViewModel
     //Add tasks adapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentTasksBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(requireActivity().viewModelStore, TasksViewModelFactory())[TasksViewModel::class.java]
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.fabCreateTask.setOnClickListener { viewModel.clickCreate() }
+        binding.fabCreateTask.setOnClickListener {
+            viewModel.produce(TasksIntent.ShowDialog)
+        }
 
         viewModel.state
             .onEach { render(it) }
@@ -46,12 +49,17 @@ class TasksFragment : Fragment(), TasksView {
                 .setView(R.layout.dialog_create_task)
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
+                .setCancelable(false)
                 .show()
                 .apply {
                     val name = findViewById<EditText>(R.id.et_name)?.text ?: ""
 
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        viewModel.clickSubmit("$name")
+                        viewModel.produce(TasksIntent.Create(Task("$name", "", "")))
+                        dismiss()
+                    }
+                    getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+                        viewModel.produce(TasksIntent.DismissDialog)
                         dismiss()
                     }
                 }
@@ -72,8 +80,8 @@ class TasksFragment : Fragment(), TasksView {
 
     override fun render(state: TasksState) {
         when (state) {
-            is TasksState.Show -> showDialog()
-            is TasksState.Loading -> binding.pbLoading.isVisible = state.isLoading
+            is TasksState.ShowDialog -> showDialog()
+            is TasksState.Loading -> binding.pbLoading.isVisible = true
             is TasksState.Create -> addNewTask(state.task.name)
             is TasksState.Error -> showErrorMessage(state.msg)
             else -> Unit
@@ -83,5 +91,9 @@ class TasksFragment : Fragment(), TasksView {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        const val TAG = "TasksFragment"
     }
 }
