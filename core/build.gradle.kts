@@ -32,12 +32,12 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.8.0")
-    implementation("androidx.appcompat:appcompat:1.4.2")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    implementation("com.google.android.material:material:1.6.1")
+    implementation(Dependencies.androidXcore)
+    implementation(Dependencies.appCompat)
+    implementation(Dependencies.constraintLayout)
+    implementation(Dependencies.lifecycleRuntime)
+    implementation(Dependencies.viewModel)
+    implementation(Dependencies.material)
 
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(Dependencies.junit)
 }
