@@ -1,11 +1,11 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    kotlin("android")
 }
 
 android {
     compileSdk = 32
-    flavorDimensions.add("gstore")
+    flavorDimensions.add(Flavors.DIMENSION)
 
     defaultConfig {
         applicationId = "com.github.bcbsilfd"
@@ -15,24 +15,15 @@ android {
         versionName = "1.0"
     }
 
-    buildTypes {
-        debug {  }
-
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
-
     productFlavors {
         create("gp") {
-            dimension = "gstore"
+            dimension = Flavors.DIMENSION
             applicationIdSuffix = ".gp"
             isDefault = true
             versionName = "1.0.1"
         }
         create("fb") {
-            dimension = "gstore"
+            dimension = Flavors.DIMENSION
             applicationIdSuffix = ".fb"
             versionName = "2.0.1"
         }
