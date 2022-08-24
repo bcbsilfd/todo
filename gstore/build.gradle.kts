@@ -5,7 +5,7 @@ plugins {
 
 android {
     compileSdk = 32
-    flavorDimensions.add(Flavors.DIMENSION)
+    flavorDimensions.add(Flavors.DIMENSIONS)
 
     defaultConfig {
         applicationId = "com.github.bcbsilfd"
@@ -14,16 +14,15 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-
     productFlavors {
         create("gp") {
-            dimension = Flavors.DIMENSION
+            dimension = Flavors.DIMENSIONS
             applicationIdSuffix = ".gp"
             isDefault = true
             versionName = "1.0.1"
         }
         create("fb") {
-            dimension = Flavors.DIMENSION
+            dimension = Flavors.DIMENSIONS
             applicationIdSuffix = ".fb"
             versionName = "2.0.1"
         }

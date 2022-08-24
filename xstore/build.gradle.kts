@@ -5,7 +5,7 @@ plugins {
 
 android {
     compileSdk = 32
-    flavorDimensions.add("xstore")
+    flavorDimensions.add(Flavors.DIMENSIONS)
 
     defaultConfig {
         applicationId = "com.github.bcbsilfd"
@@ -14,27 +14,17 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-
-    buildTypes {
-        debug {  }
-
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
-
     productFlavors {
         create("hms") {
-            dimension = "xstore"
+            dimension = Flavors.DIMENSIONS
             applicationIdSuffix = ".hms"
-            isDefault = true
             versionName = "1.0"
         }
         create("web") {
-            dimension = "xstore"
+            dimension = Flavors.DIMENSIONS
             applicationIdSuffix = ".web"
             versionName = "2.0"
+            isDefault = true
         }
     }
 }
