@@ -3,6 +3,7 @@ package com.github.bcbsilfd.todo
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.github.bcbsilfd.todo.databinding.ActivityMainBinding
 
@@ -19,6 +20,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         showTasksFragment()
+
+        Toast.makeText(this, BuildConfig.FLAVOR, Toast.LENGTH_SHORT).show()
     }
 
     private fun showTasksFragment() {

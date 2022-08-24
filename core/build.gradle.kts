@@ -6,18 +6,19 @@ plugins {
 }
 
 android {
-    compileSdk = 32
     namespace = "com.github.bcbsilfd.todo"
+    compileSdk = 32
+    flavorDimensions.add(Flavors.DIMENSIONS)
 
     buildTypes {
-        getByName("debug") {
-        }
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-
+    Flavors.FLAVORS.forEach {
+        productFlavors.apply { create(it) }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
